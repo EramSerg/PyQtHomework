@@ -36,8 +36,7 @@ class Window(QtWidgets.QWidget):
         vbox = QtWidgets.QVBoxLayout()
         vbox.addLayout(hbox)
         vbox.addLayout(hboxpasswd)
-        vbox.addWidget(self.button)
-        vbox.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        vbox.addWidget(self.button, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(vbox)
 
