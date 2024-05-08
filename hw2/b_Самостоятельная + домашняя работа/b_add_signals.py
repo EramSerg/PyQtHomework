@@ -9,7 +9,7 @@ class Window(QtWidgets.QWidget):
         super().__init__(parent)
 
         self.initUi()
-        # TODO: Вызвать метод с инициализацией сигналов
+        self.initSignals() # Вызвать метод с инициализацией сигналов
 
     def initUi(self) -> None:
         """
@@ -132,19 +132,19 @@ class Window(QtWidgets.QWidget):
         :return: None
         """
 
-        self.pushButtonComboBox  # TODO подключить слот для вывода текста из comboBox в plainTextEditLog при нажатии на кнопку
+        self.pushButtonComboBox.clicked.connect(self.pushButtonComboBoxClickedOutputText)  # подключить слот для вывода текста из comboBox в plainTextEditLog при нажатии на кнопку
         self.pushButtonLineEdit.clicked.connect(self.onPushButtonLineEditClicked)
-        self.pushButtonTextEdit  # TODO подключить слот для вывода текста из textEdit в plainTextEditLog при нажатии на кнопку
-        self.pushButtonPlainTextEdit  # TODO подключить слот для вывода текста из plaineTextEdit в plainTextEditLog при нажатии на кнопку
-        self.pushButtonSpinBox  # TODO подключить слот для вывода значения из spinBox в plainTextEditLog при нажатии на кнопку
-        self.pushButtonDoubleSpinBox  # TODO подключить слот для вывода значения из doubleSpinBox в plainTextEditLog при нажатии на кнопку
-        self.pushButtonTimeEdit  # TODO подключить слот для вывода времени из timeEdit в plainTextEditLog при нажатии на кнопку
-        self.pushButtonDateTimeEdit  # TODO подключить слот для вывода времени из dateTimeEdit в plainTextEditLog при нажатии на кнопку
-        self.pushButtonClearLog  # TODO подключить слот для очистки plainTextEditLog при нажатии на кнопку
+        self.pushButtonTextEdit.clicked.connect(self.pushButtonTextEditClickedOutputText)  # подключить слот для вывода текста из textEdit в plainTextEditLog при нажатии на кнопку
+        self.pushButtonPlainTextEdit.clicked.connect(self.pushButtonPlainTextEditClickedOutputText)  # подключить слот для вывода текста из plaineTextEdit в plainTextEditLog при нажатии на кнопку
+        self.pushButtonSpinBox.clicked.connect(self.pushButtonSpinBoxOutputText)  # подключить слот для вывода значения из spinBox в plainTextEditLog при нажатии на кнопку
+        self.pushButtonDoubleSpinBox.clicked.connect(self.pushButtonDoubleSpinBoxOutputText)  # подключить слот для вывода значения из doubleSpinBox в plainTextEditLog при нажатии на кнопку
+        self.pushButtonTimeEdit.clicked.connect(self.pushButtonTimeEditOutputTime)  # подключить слот для вывода времени из timeEdit в plainTextEditLog при нажатии на кнопку
+        self.pushButtonDateTimeEdit.clicked.connect(self.pushButtonDateTimeEditOutputDateTime)  # подключить слот для вывода времени из dateTimeEdit в plainTextEditLog при нажатии на кнопку
+        self.pushButtonClearLog.clicked.connect(self.pushButtonClearLogClicked)  # подключить слот для очистки plainTextEditLog при нажатии на кнопку
 
-        self.comboBox  # TODO подключить слот для вывода текста в plainTextEditLog при изменении выбранного элемента в comboBox
-        self.spinBox  # TODO подключить слот для вывода значения в plainTextEditLog при изменении значения в spinBox
-        self.dateTimeEdit  # TODO подключить слот для вывода датывремени в plainTextEditLog при изменении датывремени в dateTimeEdit
+        self.comboBox.currentTextChanged.connect(self.pushButtonComboBoxClickedOutputText)  # подключить слот для вывода текста в plainTextEditLog при изменении выбранного элемента в comboBox
+        self.spinBox.textChanged.connect(self.pushButtonSpinBoxOutputText)  # подключить слот для вывода значения в plainTextEditLog при изменении значения в spinBox
+        self.dateTimeEdit.dateTimeChanged.connect(self.pushButtonDateTimeEditOutputDateTime)  # подключить слот для вывода датывремени в plainTextEditLog при изменении датывремени в dateTimeEdit
 
     # slots --------------------------------------------------------------
     def onPushButtonLineEditClicked(self) -> None:
@@ -156,7 +156,42 @@ class Window(QtWidgets.QWidget):
 
         self.plainTextEditLog.setPlainText(self.lineEdit.text())
 
-    # TODO Самостоятельная реализация слотов для сигналов
+    # Самостоятельная реализация слотов для сигналов
+
+    def pushButtonComboBoxClickedOutputText(self):
+        text = self.comboBox.currentText()
+        self.plainTextEditLog.setPlainText(text)
+        pass
+
+    def pushButtonTextEditClickedOutputText(self):
+        text = self.textEdit.toPlainText()
+        self.plainTextEditLog.setPlainText(text)
+        pass
+
+    def pushButtonPlainTextEditClickedOutputText(self):
+        text = self.plainTextEdit.toPlainText()
+        self.plainTextEditLog.setPlainText(text)
+        pass
+
+    def pushButtonSpinBoxOutputText(self):
+        text = self.spinBox.text()
+        self.plainTextEditLog.setPlainText(text)
+
+    def pushButtonDoubleSpinBoxOutputText(self):
+        text = self.doubleSpinBox.text()
+        self.plainTextEditLog.setPlainText(text)
+
+    def pushButtonTimeEditOutputTime(self):
+        text = self.timeEdit.text()
+        self.plainTextEditLog.setPlainText(text)
+
+    def pushButtonDateTimeEditOutputDateTime(self):
+        text = self.dateTimeEdit.text()
+        self.plainTextEditLog.setPlainText(text)
+
+    def pushButtonClearLogClicked(self):
+        self.plainTextEditLog.clear()
+        pass
 
 
 if __name__ == "__main__":
