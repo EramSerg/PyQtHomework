@@ -35,6 +35,19 @@ class Window(QtWidgets.QWidget):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.initSignals()
+        self.window().installEventFilter(self)
+
+    def eventFilter(self, watched, event):
+        """if watched == self.window() and event.type() == QtCore.QEvent.Type.MouseButtonPress:
+            print(f'{event}, {self.window().x()}, {self.window().y()}')"""
+        old_coord_x = self.window().x()
+        old_coord_y = self.window().y()
+        if watched == self.window() and event.type() == QtCore.QEvent.Type.Move:
+            new_coord_x = self.window().x()
+            new_coord_y = self.window().y()
+            print(f'Старые координаты окна: {old_coord_x, old_coord_y}. Новые координаты окна:  {new_coord_x, new_coord_y}')
+
+        return True
 
     def initSignals(self) -> None:
         self.ui.pushButtonLB.clicked.connect(self.pushButtonLBClicked)
@@ -94,23 +107,45 @@ class Window(QtWidgets.QWidget):
 
 
     def pushButtonGetDataClicked(self):
+        # размеры окна
         width_, height_ = self.window().size().toTuple()
+
+        # текущие координаты окна
         coord_x = self.window().x()
         coord_y = self.window().y()
+
+        # минимальные размеры окна
         min_size_window_width, min_size_window_height = self.window().minimumSize().toTuple()
+
+        # разрешение экрана
         screen_size_w, screen_size_h = self.getscreensize()
+
+        # статус окна свернуто/развернуто
         if self.window().isVisible():
             status_window = 'Развернуто'
         else:
             status_window = 'Свернуто'
 
+        # количество экранов
         count_screens = len(QApplication.screens())
+
+        # Координаты центра приложения
+        coord_center = (width_/2-coord_x, height_/2-coord_y)
+
+        # Текущее основное окно
+
+        # На каком экране окно находится
+
+        #
+
+        # добавление параметров в plainTextEdit
         self.ui.plainTextEdit.appendPlainText(f'{time.ctime()}: Размер окна: width={width_}, height={height_}\n'
                                            f'{time.ctime()}: Текущее расположение (координаты) окна: x={coord_x}, y={coord_y}\n'
                                            f'{time.ctime()}: Минимальные размеры окна: width={min_size_window_width}, height={min_size_window_height}\n'
                                            f'{time.ctime()}: Разрешение экрана: {screen_size_w} * {screen_size_h}\n'
                                            f'{time.ctime()}: Статус окна (свернуто/развернуто): {status_window}\n'
-                                           f'{time.ctime()}: Количество экранов: {count_screens}')
+                                           f'{time.ctime()}: Количество экранов: {count_screens}\n'
+                                              f'{time.ctime()}: Координаты центра приложения: {coord_center}')
 
         pass
 
