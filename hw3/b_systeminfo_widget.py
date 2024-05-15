@@ -12,6 +12,7 @@
 реагировать на изменение времени задержки
 """
 import time
+from typing import Tuple, Any
 
 import psutil
 from PySide6 import QtWidgets, QtCore
@@ -25,15 +26,20 @@ class CpuRamInfo(QtCore.QThread):
         self.delay = None
         self.status = True
 
-    def run(self) -> None:
+    def run(self):
         if self.delay is None:
             self.delay = 1
 
         while True:
-            cpu_value = psutil.cpu_percent()
-            ram_value = psutil.virtual_memory().percent
-            self.systemSignal.emit([cpu_value, ram_value])
             time.sleep(self.delay)
+
+    def get_cpu_value(self):
+        cpu_value = psutil.cpu_percent()
+        return cpu_value
+
+    def get_ram_value(self):
+        ram_value = psutil.virtual_memory().percent
+        return ram_value
 
 
 class Window(QtWidgets.QWidget):
@@ -46,7 +52,6 @@ class Window(QtWidgets.QWidget):
         self.ram_label = None
         self.cpu_label = None
         self.initUi()
-        self.CpuRamInfo = CpuRamInfo(parent=None)
         self.initSignals()
 
     def initUi(self) -> None:
@@ -66,11 +71,21 @@ class Window(QtWidgets.QWidget):
 
         self.setLayout(l)
 
+        self.cpu_ram_info = CpuRamInfo()
+
     def initSignals(self):
-        self.start_button.clicked.connect(CpuRamInfo)
+        self.start_button.clicked.connect(self.on_started)
         pass
 
+    def on_started(self):
+        if not self.cpu_ram_info.isRunning():
+            self.cpu_ram_info.start()
+            self.cpu_label.setPlaceholderText(f'загрузка CPU: {self.cpu_ram_info.get_cpu_value}')
+            self.ram_label.setPlaceholderText(f'загрузка RAM: {self.cpu_ram_info.get_ram_value}')
 
+    def on_changed(self):
+        if self.field_delay.textChanged():
+            delay = self.field_delay.text()
 
 
 if __name__ == "__main__":
