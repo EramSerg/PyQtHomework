@@ -1,19 +1,3 @@
-"""
-Реализовать виджет, который будет работать с потоком SystemInfo из модуля a_threads
-
-Создавать форму можно как в ручную, так и с помощью программы Designer
-
-Форма должна содержать:
-1. поле для ввода времени задержки
-2. поле для вывода информации о загрузке CPU
-3. поле для вывода информации о загрузке RAM
-4. поток необходимо запускать сразу при старте приложения
-5. установку времени задержки сделать "горячей", т.е. поток должен сразу
-реагировать на изменение времени задержки
-"""
-import time
-from typing import Tuple, Any
-
 import psutil
 from PySide6 import QtWidgets, QtCore
 
@@ -45,7 +29,6 @@ class CpuRamInfoThread(QtCore.QThread):
         ram_value = psutil.virtual_memory().percent
         return ram_value
 
-
 class Window(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
@@ -59,47 +42,34 @@ class Window(QtWidgets.QWidget):
         self.initSignals()
 
     def initUi(self) -> None:
-        l = QtWidgets.QHBoxLayout()
+        l_vertic = QtWidgets.QVBoxLayout()
 
         self.field_delay = QtWidgets.QSpinBox()
         self.field_delay.setMinimumSize(60, 20)
         self.cpu_label = QtWidgets.QLineEdit()
-        self.cpu_label.setText(f'загрузка CPU: {psutil.cpu_percent()}')
+        self.cpu_label.setPlaceholderText(f'загрузка CPU: ')
         self.ram_label = QtWidgets.QLineEdit()
-        self.ram_label.setText(f'загрузка RAM: {psutil.virtual_memory().percent}')
-        self.start_button = QtWidgets.QPushButton('Запуск')
-        self.stop_button = QtWidgets.QPushButton('Остановить')
+        self.ram_label.setPlaceholderText(f'загрузка RAM: ')
 
-        l.addWidget(self.field_delay)
-        l.addWidget(self.cpu_label)
-        l.addWidget(self.ram_label)
-        l.addWidget(self.start_button)
-        l.addWidget(self.stop_button)
+        l_vertic.addWidget(self.field_delay)
+        l_vertic.addWidget(self.cpu_label)
+        l_vertic.addWidget(self.ram_label)
 
-        self.setLayout(l)
+
+        self.setLayout(l_vertic)
 
         self.cpu_ram_info = CpuRamInfoThread()
         self.cpu_ram_info.start()
 
     def initSignals(self):
-        #self.start_button.clicked.connect(self.on_started)
-        #self.stop_button.clicked.connect(self.on_finished)
         self.cpu_ram_info.CpuRamInfoReceived.connect(self.on_started)
         self.field_delay.textChanged.connect(self.on_changed)
-        pass
 
     def on_started(self):
         if not self.cpu_ram_info.isRunning():
-            #self.start_button.setDisabled(True)
-            #self.stop_button.setDisabled(True)
             self.cpu_ram_info.start()
             self.cpu_label.setText(f'загрузка CPU: {self.cpu_ram_info.get_cpu_value()}')
             self.ram_label.setText(f'загрузка RAM: {self.cpu_ram_info.get_ram_value()}')
-
-    """def on_finished(self):
-        self.stop_button.setEnabled(False)
-        self.start_button.setEnabled(True)"""
-
 
     def on_changed(self):
         delay = int(self.field_delay.text())
