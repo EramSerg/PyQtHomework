@@ -18,7 +18,7 @@ import psutil
 from PySide6 import QtWidgets, QtCore
 
 
-class CpuRamInfo(QtCore.QThread):
+class CpuRamInfoThread(QtCore.QThread):
     CpuRamInfoReceived = QtCore.Signal(str)
 
     def __init__(self, parent=None):
@@ -26,12 +26,16 @@ class CpuRamInfo(QtCore.QThread):
         self.delay = None
         self.status = True
 
-    def run(self):
+    def run(self, delay=None):
         if self.delay is None:
             self.delay = 1
-
-        while True:
-            time.sleep(self.delay)
+            self.sleep(self.delay)
+            self.CpuRamInfoReceived.emit(self.get_cpu_value())
+            self.CpuRamInfoReceived.emit(self.get_ram_value())
+        else:
+            self.sleep(self.delay)
+            self.CpuRamInfoReceived.emit(self.get_cpu_value())
+            self.CpuRamInfoReceived.emit(self.get_ram_value())
 
     def get_cpu_value(self):
         cpu_value = psutil.cpu_percent()
@@ -58,40 +62,53 @@ class Window(QtWidgets.QWidget):
         l = QtWidgets.QHBoxLayout()
 
         self.field_delay = QtWidgets.QSpinBox()
+        self.field_delay.setMinimumSize(60, 20)
         self.cpu_label = QtWidgets.QLineEdit()
-        self.cpu_label.setPlaceholderText(f'загрузка CPU: {psutil.cpu_percent()}')
+        self.cpu_label.setText(f'загрузка CPU: {psutil.cpu_percent()}')
         self.ram_label = QtWidgets.QLineEdit()
-        self.ram_label.setPlaceholderText(f'загрузка RAM: {psutil.virtual_memory().percent}')
+        self.ram_label.setText(f'загрузка RAM: {psutil.virtual_memory().percent}')
         self.start_button = QtWidgets.QPushButton('Запуск')
+        self.stop_button = QtWidgets.QPushButton('Остановить')
 
         l.addWidget(self.field_delay)
         l.addWidget(self.cpu_label)
         l.addWidget(self.ram_label)
         l.addWidget(self.start_button)
+        l.addWidget(self.stop_button)
 
         self.setLayout(l)
 
-        self.cpu_ram_info = CpuRamInfo()
+        self.cpu_ram_info = CpuRamInfoThread()
+        self.cpu_ram_info.start()
+        self.on_started()
 
     def initSignals(self):
         self.start_button.clicked.connect(self.on_started)
+        self.stop_button.clicked.connect(self.on_finished)
         pass
 
     def on_started(self):
         if not self.cpu_ram_info.isRunning():
             self.cpu_ram_info.start()
-            self.cpu_label.setPlaceholderText(f'загрузка CPU: {self.cpu_ram_info.get_cpu_value}')
-            self.ram_label.setPlaceholderText(f'загрузка RAM: {self.cpu_ram_info.get_ram_value}')
+            self.cpu_label.setText(f'загрузка CPU: {self.cpu_ram_info.get_cpu_value()}')
+            self.ram_label.setText(f'загрузка RAM: {self.cpu_ram_info.get_ram_value()}')
+
+    def on_finished(self):
+        if self.cpu_ram_info.isRunning():
+            self.cpu_ram_info.finished()
+            self.stop_button.setEnabled(False)
 
     def on_changed(self):
         if self.field_delay.textChanged():
             delay = self.field_delay.text()
+            return delay
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication()
 
     window = Window()
+    window.resize(400, 100)
     window.show()
 
     app.exec()
