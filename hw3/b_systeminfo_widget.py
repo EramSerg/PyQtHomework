@@ -28,7 +28,7 @@ class CpuRamInfoThread(QtCore.QThread):
 
     def run(self, delay=None):
         if self.delay is None:
-            self.delay = 1
+            self.delay = 5
             self.sleep(self.delay)
             self.CpuRamInfoReceived.emit(self.get_cpu_value())
             self.CpuRamInfoReceived.emit(self.get_ram_value())
@@ -80,23 +80,25 @@ class Window(QtWidgets.QWidget):
 
         self.cpu_ram_info = CpuRamInfoThread()
         self.cpu_ram_info.start()
-        self.on_started()
 
     def initSignals(self):
         self.start_button.clicked.connect(self.on_started)
         self.stop_button.clicked.connect(self.on_finished)
+        self.cpu_ram_info.CpuRamInfoReceived.connect(self.on_started)
         pass
 
     def on_started(self):
         if not self.cpu_ram_info.isRunning():
+            self.start_button.setDisabled(True)
             self.cpu_ram_info.start()
             self.cpu_label.setText(f'загрузка CPU: {self.cpu_ram_info.get_cpu_value()}')
             self.ram_label.setText(f'загрузка RAM: {self.cpu_ram_info.get_ram_value()}')
+            self.start_button.setEnabled(True)
 
     def on_finished(self):
-        if self.cpu_ram_info.isRunning():
-            self.cpu_ram_info.finished()
-            self.stop_button.setEnabled(False)
+        self.stop_button.setEnabled(False)
+        self.start_button.setEnabled(True)
+
 
     def on_changed(self):
         if self.field_delay.textChanged():
