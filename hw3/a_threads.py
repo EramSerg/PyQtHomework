@@ -35,7 +35,7 @@ class WeatherHandler(QtCore.QThread):
         super().__init__(parent)
 
         self.__api_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
-        self.__delay = 10
+        self.delay = 10
         self.lat = None
         self.lon = None
         self.__status = True
@@ -48,7 +48,7 @@ class WeatherHandler(QtCore.QThread):
         :return: None
         """
 
-        self.__delay = delay
+        self.delay = delay
 
     def run(self) -> None:
 
@@ -60,6 +60,6 @@ class WeatherHandler(QtCore.QThread):
             current_weather = data['current_weather']
             e_data = f'latitude: {lat}, longitude: {lon}, current_weather: {current_weather}'
             self.weatherHandler.emit(e_data)
-            time.sleep(self.__delay)
+            time.sleep(self.delay)
 
 

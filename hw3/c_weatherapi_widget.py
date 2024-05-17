@@ -61,21 +61,28 @@ class Window(QtWidgets.QWidget):
 
     def initSignals(self):
         self.push_button.clicked.connect(self.on_started)
-        #self.weatherHandler.weatherHandler.connect(self.get_signal_from_thread)
         #self.latitude_lineedit.textChanged.connect(self.lat_lon_changed)
 
     def on_started(self):
         self.weatherHandler = WeatherHandler(lat=int(self.latitude_lineedit.text()), lon=int(self.longitude_lineedit.text()))
+        self.weatherHandler.setDelay(int(self.spinbox_delay.text()))
         self.weatherHandler.start()
+        self.weatherHandler.sleep(self.weatherHandler.delay)
         self.weatherHandler.weatherHandler.connect(self.get_signal_from_thread)
 
     def get_signal_from_thread(self, s):
         if self.push_button.isChecked():
             self.push_button.setText('Остановить')
+            self.latitude_lineedit.setReadOnly(True)
+            self.longitude_lineedit.setReadOnly(True)
+            self.spinbox_delay.setReadOnly(True)
             self.weather_plaintextedit.appendPlainText(s)
         elif not self.push_button.isChecked():
             self.weatherHandler.terminate()
             self.push_button.setText('Запустить')
+            self.latitude_lineedit.setReadOnly(False)
+            self.longitude_lineedit.setReadOnly(False)
+            self.spinbox_delay.setReadOnly(False)
 
     """def lat_lon_changed(self, s):
         #lat = int(self.latitude_lineedit.text())
