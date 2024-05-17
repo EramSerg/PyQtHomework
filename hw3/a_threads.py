@@ -36,7 +36,7 @@ class WeatherHandler(QtCore.QThread):
 
         self.__api_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
         self.__delay = 10
-        self.__status = None
+        self.__status = True
 
     def setDelay(self, delay) -> None:
         """
@@ -53,7 +53,11 @@ class WeatherHandler(QtCore.QThread):
         while self.__status:
             response = requests.get(self.__api_url)
             data = response.json()
-            self.weatherHandler.emit(data)
+            lat = data['latitude']
+            lon = data['longitude']
+            current_weather = data['current_weather']
+            e_data = f'latitude: {lat}, longitude: {lon}, current_weather: {current_weather}'
+            self.weatherHandler.emit(e_data)
             time.sleep(self.__delay)
 
 
