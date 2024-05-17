@@ -19,6 +19,8 @@ class Window(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.lat = 0
+        self.lon = 0
         self.initUI()
         self.initSignals()
 
@@ -30,10 +32,10 @@ class Window(QtWidgets.QWidget):
         main_h_layout = QtWidgets.QHBoxLayout()
 
         self.latitude_lineedit = QtWidgets.QLineEdit()
-        self.latitude_lineedit.setText('50')
+        self.latitude_lineedit.setText(str(self.lat))
         self.latitude_label = QtWidgets.QLabel('Широта:')
         self.longitude_lineedit = QtWidgets.QLineEdit()
-        self.longitude_lineedit.setText('50')
+        self.longitude_lineedit.setText(str(self.lon))
         self.longitude_label = QtWidgets.QLabel('Долгота:')
         self.spinbox_delay = QtWidgets.QSpinBox()
         self.spinbox_delay.setMinimum(1)
@@ -57,18 +59,38 @@ class Window(QtWidgets.QWidget):
 
         self.setLayout(main_h_layout)
 
-
-        self.weatherHandler = WeatherHandler(lat=50, lon=50)
-        #self.weatherHandler.start()
-
-
     def initSignals(self):
-        self.push_button.clicked.connect(self.push_button_clicked_connect)
-        self.weatherHandler.weatherHandler.connect(self.push_button_clicked_connect)
+        self.push_button.clicked.connect(self.on_started)
+        #self.weatherHandler.weatherHandler.connect(self.get_signal_from_thread)
+        #self.latitude_lineedit.textChanged.connect(self.lat_lon_changed)
 
-    def push_button_clicked_connect(self, s):
+    def on_started(self):
+        self.weatherHandler = WeatherHandler(lat=int(self.latitude_lineedit.text()), lon=int(self.longitude_lineedit.text()))
         self.weatherHandler.start()
-        self.weather_plaintextedit.setPlainText(s)
+        self.weatherHandler.weatherHandler.connect(self.get_signal_from_thread)
+
+    def get_signal_from_thread(self, s):
+        if self.push_button.isChecked():
+            self.push_button.setText('Остановить')
+            self.weather_plaintextedit.appendPlainText(s)
+        elif not self.push_button.isChecked():
+            self.weatherHandler.terminate()
+            self.push_button.setText('Запустить')
+
+    """def lat_lon_changed(self, s):
+        #lat = int(self.latitude_lineedit.text())
+        #lon = int(self.longitude_lineedit.text())
+        if not self.weatherHandler.isRunning():
+            if self.push_button.isChecked():
+                # self.weatherHandler.lat = int(self.latitude_lineedit.text())
+                # print(self.lat)
+                self.push_button.setText('Остановить')
+                self.weatherHandler.start()
+                self.weather_plaintextedit.appendPlainText(s)
+            elif not self.push_button.isChecked():
+                self.weatherHandler.terminate()
+                self.push_button.setText('Запустить')"""
+
 
 
 
@@ -76,7 +98,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication()
 
     window = Window()
-    window.resize(400, 100)
+    window.resize(800, 200)
     window.show()
 
     app.exec()
