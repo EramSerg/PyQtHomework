@@ -278,6 +278,9 @@ if __name__ == "__main__":
     window.setWindowTitle('Планировщик задач')
     window.setWindowIcon(QtGui.QIcon('icons8-create-64.png'))
     window.resize(800, 200)
+    pal = window.palette()
+    pal.setColor(QtGui.QPalette.ColorGroup.Normal, QtGui.QPalette.ColorRole.Window, QtGui.QColor('#C0C0C0'))
+    window.setPalette(pal)
     window.show()
 
     app.exec()
